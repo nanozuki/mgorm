@@ -1,6 +1,9 @@
 package mgorm
 
-import "github.com/globalsign/mgo"
+import (
+	"github.com/globalsign/mgo"
+	"github.com/pkg/errors"
+)
 
 // Iter wrap original iter, add close function
 type Iter struct {
@@ -12,5 +15,5 @@ type Iter struct {
 func (it *Iter) Close() error {
 	err := it.Iter.Close()
 	it.closeSession()
-	return err
+	return errors.Wrap(err, "close iter")
 }

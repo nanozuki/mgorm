@@ -49,7 +49,7 @@ func (m *Model) CreateIndex(index mgo.Index) error {
 func (m *Model) Insert(docs ...interface{}) error {
 	c, done := m.C()
 	defer done()
-	return m.wrapErr(c.Insert(docs), "insert")
+	return m.wrapErr(c.Insert(docs...), "insert")
 }
 
 // Update document matching selector

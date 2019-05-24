@@ -8,11 +8,9 @@ import (
 )
 
 var client = struct {
-	urls     map[string]string
 	sessions map[string]*mgo.Session
 	mutex    sync.RWMutex
 }{
-	urls:     make(map[string]string),
 	sessions: make(map[string]*mgo.Session),
 }
 
@@ -21,12 +19,24 @@ var client = struct {
 func Init(urls map[string]string) error {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	client.urls = urls
 
-	for alias, url := range client.urls {
+	for alias, url := range urls {
 		session, err := mgo.Dial(url)
 		if err != nil {
 			return errors.Wrapf(err, "connect to mongodb: %s", url)
+		}
+		client.sessions[alias] = session
+	}
+	return nil
+}
+
+func InitWithInfo(infos map[string]*mgo.DialInfo) error {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	for alias, info := range infos {
+		session, err := mgo.DialWithInfo(info)
+		if err != nil {
+			return errors.Wrapf(err, "connect to mongodb: %v", info)
 		}
 		client.sessions[alias] = session
 	}

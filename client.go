@@ -43,7 +43,7 @@ func InitWithInfo(infos map[string]*mgo.DialInfo) error {
 	return nil
 }
 
-// GetSession return original session for specified server alias
+// GetSession return an copy of original session for specified server alias
 func GetSession(alias string) *mgo.Session {
 	client.mutex.RLock()
 	defer client.mutex.RUnlock()
@@ -53,4 +53,16 @@ func GetSession(alias string) *mgo.Session {
 		panic(errors.Errorf("can't find alias '%s'", alias))
 	}
 	return session.Copy()
+}
+
+// GetSession return original session for specified server alias
+func GetRawSession(alias string) *mgo.Session {
+	client.mutex.RLock()
+	defer client.mutex.RUnlock()
+
+	session, ok := client.sessions[alias]
+	if !ok {
+		panic(errors.Errorf("can't find alias '%s'", alias))
+	}
+	return session
 }

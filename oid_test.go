@@ -75,3 +75,27 @@ func TestMsgpack(t *testing.T) {
 		t.Errorf("marshal unmarshal msgpack failed, before: %v, after: %v", foo1, foo2)
 	}
 }
+
+func TestSaveObj(t *testing.T) {
+	Init(map[string]string{"test": "mongodb://127.0.0.1:27017"})
+	type foo struct {
+		ID OID `bson:"_id"`
+		A  int `bson:"a"`
+	}
+	s := GetSession("test")
+	s.DB("test").DropDatabase()
+	s.Close()
+	fooModel := NewModel("test", "test", "foo")
+
+	foo1 := foo{ID: OID(bson.NewObjectId()), A: 100}
+	if err := fooModel.Insert(&foo1); err != nil {
+		t.Fatal(err)
+	}
+	var foo2 foo
+	if err := fooModel.FindID(&foo2, foo1.ID.ObjectID()); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(foo2, foo1) {
+		t.Fatalf("find %+v, want %+v", foo2, foo1)
+	}
+}

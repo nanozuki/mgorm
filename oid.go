@@ -28,6 +28,24 @@ func ParseOIDFromString(s string) (OID, error) {
 	return OID(bson.ObjectIdHex(s)), nil
 }
 
+// BSON
+
+func (o *OID) GetBSON() (interface{}, error) {
+	s := o.ObjectID()
+	return s, nil
+}
+
+func (o *OID) SetBSON(raw bson.Raw) error {
+	var bid bson.ObjectId
+	if err := raw.Unmarshal(&bid); err != nil {
+		return err
+	}
+	*o = OID(bid)
+	return nil
+}
+
+// JSON
+
 func (o *OID) UnmarshalJSON(b []byte) error {
 	var s string
 	if err := json.Unmarshal(b, &s); err != nil {
@@ -45,6 +63,8 @@ func (o OID) MarshalJSON() ([]byte, error) {
 	s := bson.ObjectId(o).Hex()
 	return json.Marshal(s)
 }
+
+// Msgpack
 
 func (o *OID) EncodeMsgpack(enc *msgpack.Encoder) error {
 	s := o.ObjectID().Hex()

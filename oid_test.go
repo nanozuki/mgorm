@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/globalsign/mgo/bson"
+	"github.com/vmihailenco/msgpack"
 )
 
 func TestMarshalJSON(t *testing.T) {
@@ -53,5 +54,24 @@ func TestBSON(t *testing.T) {
 	}
 	if !reflect.DeepEqual(foo1, foo2) {
 		t.Errorf("marshal unmarshal bson failed, before: %v, after: %v", foo1, foo2)
+	}
+}
+
+func TestMsgpack(t *testing.T) {
+	type foo struct {
+		ID OID `bson:"_id"`
+		A  int `bson:"a"`
+	}
+	foo1 := foo{ID: OID(bson.NewObjectId()), A: 5}
+	bytes, err := msgpack.Marshal(&foo1)
+	if err != nil {
+		t.Errorf("marshal msgpack failed: %v", err)
+	}
+	var foo2 foo
+	if err := msgpack.Unmarshal(bytes, &foo2); err != nil {
+		t.Errorf("unmarshal msgpack failed: %v", err)
+	}
+	if !reflect.DeepEqual(foo1, foo2) {
+		t.Errorf("marshal unmarshal msgpack failed, before: %v, after: %v", foo1, foo2)
 	}
 }
